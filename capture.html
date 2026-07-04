@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; }
+    body {
+      background: transparent;
+      cursor: crosshair;
+      overflow: hidden;
+      user-select: none;
+    }
+    #crosshair-h, #crosshair-v {
+      position: fixed;
+      background: rgba(255, 50, 50, 0.6);
+      pointer-events: none;
+      z-index: 1;
+    }
+    #crosshair-h {
+      width: 100vw;
+      height: 1px;
+      left: 0;
+    }
+    #crosshair-v {
+      width: 1px;
+      height: 100vh;
+      top: 0;
+    }
+    #coord-label {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 2;
+      white-space: nowrap;
+    }
+    #hint {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #fff;
+      padding: 8px 12px 8px 20px;
+      border-radius: 10px;
+      font-family: -apple-system, sans-serif;
+      font-size: 13px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    #cancel-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    #cancel-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="crosshair-h" style="display:none"></div>
+  <div id="crosshair-v" style="display:none"></div>
+  <div id="coord-label" style="display:none">0, 0</div>
+  <div id="hint"><span>点击目标位置捕获坐标 · Esc 取消</span><button id="cancel-btn" title="取消">×</button></div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    const crosshairH = document.getElementById('crosshair-h');
+    const crosshairV = document.getElementById('crosshair-v');
+    const coordLabel = document.getElementById('coord-label');
+
+    document.addEventListener('mousemove', (e) => {
+      crosshairH.style.display = '';
+      crosshairV.style.display = '';
+      coordLabel.style.display = '';
+      crosshairH.style.top = e.clientY + 'px';
+      crosshairV.style.left = e.clientX + 'px';
+      coordLabel.style.left = (e.clientX + 16) + 'px';
+      coordLabel.style.top = (e.clientY + 16) + 'px';
+      ipcRenderer.send('capture-mousemove');
+    });
+
+    document.addEventListener('mouseleave', () => {
+      crosshairH.style.display = 'none';
+      crosshairV.style.display = 'none';
+      coordLabel.style.display = 'none';
+    });
+
+    ipcRenderer.on('capture-pos', (event, pos) => {
+      coordLabel.textContent = `${pos.x}, ${pos.y}`;
+    });
+
+    document.addEventListener('mousedown', (e) => {
+      if (e.button === 0) {
+        ipcRenderer.send('capture-clicked');
+      }
+    });
+
+    // 关闭按钮
+    document.getElementById('cancel-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      ipcRenderer.send('capture-cancelled');
+    });
+  </script>
+</body>
+</html>
