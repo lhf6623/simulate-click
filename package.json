@@ -27,7 +27,11 @@
       "icon": "icon.icns",
       "hardenedRuntime": true,
       "entitlements": "entitlements.plist",
-      "entitlementsInherit": "entitlements.plist"
+      "entitlementsInherit": "entitlements.plist",
+      "extraResources": [
+        { "from": "bg_click", "to": "." },
+        { "from": "check_perm", "to": "." }
+      ]
     }
   }
 }

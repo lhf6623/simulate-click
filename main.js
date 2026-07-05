@@ -17,10 +17,15 @@ let clickConfig = {
   maxDelay: 1500
 };
 
+// 获取资源路径（开发时用 __dirname，打包后用 process.resourcesPath）
+function getResourcePath(filename) {
+  return path.join(app.isPackaged ? process.resourcesPath : __dirname, filename);
+}
+
 // 启动后台点击进程
 function startBgClickProcess() {
   if (bgClickProcess) return;
-  const bgClickPath = path.join(__dirname, 'bg_click');
+  const bgClickPath = getResourcePath('bg_click');
   bgClickProcess = spawn(bgClickPath, [], { stdio: ['pipe', 'pipe', 'pipe'] });
   bgClickReady = false;
   bgClickProcess.stdout.on('data', (data) => {
@@ -280,7 +285,7 @@ ipcMain.on('check-permission', (event) => {
 
 // 请求辅助功能权限（弹出系统授权对话框）
 ipcMain.on('request-permission', (event) => {
-  const checkPermPath = path.join(__dirname, 'check_perm');
+  const checkPermPath = getResourcePath('check_perm');
   const proc = spawn(checkPermPath, [], { stdio: ['pipe', 'pipe', 'pipe'] });
   let output = '';
   proc.stdout.on('data', (data) => {
