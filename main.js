@@ -148,19 +148,34 @@ function updateEscShortcut() {
   }
 }
 
+// 请求辅助功能权限（弹出系统授权对话框，完成后回调）
+function requestAccessibilityPermission(callback) {
+  const checkPermPath = getResourcePath('check_perm');
+  const proc = spawn(checkPermPath, [], { stdio: ['pipe', 'pipe', 'pipe'] });
+  let output = '';
+  proc.stdout.on('data', (data) => {
+    output += data.toString().trim();
+  });
+  proc.on('exit', () => {
+    const granted = output.includes('granted');
+    if (callback) callback(granted);
+  });
+}
+
 function startClicking() {
   if (isClicking) return;
 
   if (!checkAccessibilityPermission()) {
-    dialog.showMessageBox(mainWindow, {
-      type: 'error',
-      title: '权限不足',
-      message: '请在系统设置 > 隐私与安全性 > 辅助功能中启用本应用的权限',
-      buttons: ['打开系统设置']
-    }).then((result) => {
-      if (result.response === 0) {
-        app.relaunch();
-        app.exit();
+    requestAccessibilityPermission((granted) => {
+      if (granted) {
+        startClicking();
+      } else {
+        dialog.showMessageBox(mainWindow, {
+          type: 'warning',
+          title: '权限未授予',
+          message: '未获得辅助功能权限，无法使用点击功能。\n\n请前往：系统设置 > 隐私与安全性 > 辅助功能\n找到本应用并开启权限后重试。',
+          buttons: ['知道了']
+        });
       }
     });
     return;
@@ -228,6 +243,22 @@ function destroyCaptureOverlays() {
 }
 
 ipcMain.on('start-capture-overlay', (event) => {
+  // 先检查权限，没权限时弹出系统授权对话框
+  if (!checkAccessibilityPermission()) {
+    requestAccessibilityPermission((granted) => {
+      if (granted) {
+        // 授权成功，重新触发
+        doStartCapture(event);
+      } else {
+        event.reply('capture-cancelled');
+      }
+    });
+    return;
+  }
+  doStartCapture(event);
+});
+
+function doStartCapture(event) {
   destroyCaptureOverlays();
   captureEvent = event;
 
@@ -251,7 +282,7 @@ ipcMain.on('start-capture-overlay', (event) => {
     captureOverlays.push(overlay);
   }
   updateEscShortcut();
-});
+}
 
 ipcMain.on('capture-clicked', () => {
   try {
@@ -283,22 +314,15 @@ ipcMain.on('check-permission', (event) => {
   event.reply('permission-status', checkAccessibilityPermission());
 });
 
-// 请求辅助功能权限（弹出系统授权对话框）
+// 请求辅助功能权限（从 UI 按钮触发，弹出系统授权对话框）
 ipcMain.on('request-permission', (event) => {
-  const checkPermPath = getResourcePath('check_perm');
-  const proc = spawn(checkPermPath, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-  let output = '';
-  proc.stdout.on('data', (data) => {
-    output += data.toString().trim();
-  });
-  proc.on('exit', () => {
-    const granted = output.includes('granted');
+  requestAccessibilityPermission((granted) => {
     event.reply('permission-status', granted);
     if (!granted) {
       dialog.showMessageBox(mainWindow, {
         type: 'warning',
         title: '权限未授予',
-        message: '未获得辅助功能权限，部分功能可能无法正常使用。\n\n请前往：系统设置 > 隐私与安全性 > 辅助功能\n找到本应用并开启权限。',
+        message: '未获得辅助功能权限，部分功能可能无法正常使用。\n\n请前往：系统设置 > 隐私与安全性 > 辅助功能\n找到本应用并开启权限后重试。',
         buttons: ['知道了']
       });
     }

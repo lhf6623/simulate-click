@@ -1,6 +1,6 @@
 {
   "name": "simulate-click",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Mac鼠标模拟点击工具",
   "main": "main.js",
   "scripts": {

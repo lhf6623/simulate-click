@@ -14,14 +14,15 @@
     .window {
       width: 280px;
       height: 310px;
-      background: rgba(30, 20, 50, 0.25);
-      backdrop-filter: blur(40px) saturate(1.8);
-      -webkit-backdrop-filter: blur(40px) saturate(1.8);
+      background: rgba(20, 15, 35, 0.55);
+      backdrop-filter: blur(50px) saturate(2);
+      -webkit-backdrop-filter: blur(50px) saturate(2);
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.15);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
     }
     /* 标题栏 */
     .titlebar {
@@ -46,8 +47,8 @@
       flex: 1;
       text-align: center;
       font-size: 12px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.7);
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
       margin-right: 12px;
     }
     /* 内容区 */
@@ -68,19 +69,20 @@
     }
     .status-dot.running { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
     .card {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.14);
       border-radius: 10px;
       padding: 10px;
     }
     .card-label {
       font-size: 10px;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.6);
       margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
+      font-weight: 500;
     }
     .card-label .status-wrap {
       margin-left: auto;
@@ -98,8 +100,8 @@
     }
     .input {
       flex: 1;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.16);
       border-radius: 6px;
       padding: 5px 8px;
       font-size: 12px;
@@ -108,8 +110,8 @@
       min-width: 0;
     }
     .input:focus {
-      border-color: rgba(255,255,255,0.3);
-      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.18);
     }
     .input::placeholder { color: rgba(255,255,255,0.25); }
     /* 隐藏数字输入框的上下箭头 */
@@ -183,10 +185,10 @@
     /* 计数器 */
     .counter {
       font-size: 10px;
-      color: rgba(255,255,255,0.4);
+      color: rgba(255,255,255,0.5);
       text-align: right;
     }
-    .counter span { color: rgba(255,255,255,0.7); font-weight: 600; }
+    .counter span { color: #fff; font-weight: 600; }
   </style>
 </head>
 <body>
