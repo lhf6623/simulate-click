@@ -1,4 +1,6 @@
-node_modules/
+.build/
+.swiftpm/
 dist/
 .DS_Store
 .qoder/
+simulate-click-swift

@@ -11,38 +11,31 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Swift binaries
-        run: npm run build:swift
-
-      - name: Build DMG
-        run: npx electron-builder --mac dmg -c.mac.hardenedRuntime=false
+      - name: Build .app & .dmg
+        run: bash build-app.sh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP_VERSION: ${{ github.ref_name }}
 
-      - name: Upload DMG artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dmg
-          path: dist/*.dmg
+          name: simulate-click
+          path: |
+            dist/*.app
+            dist/*.dmg
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.dmg
+          files: |
+            dist/*.app
+            dist/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
