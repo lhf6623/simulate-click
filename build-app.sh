@@ -12,6 +12,7 @@ APP_VERSION="${APP_VERSION:-$(cat VERSION 2>/dev/null || echo 0.0.0)}"
 APP_VERSION="${APP_VERSION#v}"  # 去掉 v 前缀（如 v1.0.0 → 1.0.0）
 
 APP_BUNDLE="${OUT_DIR}/${APP_NAME}.app"
+ZIP_NAME="${OUT_DIR}/${APP_NAME}-${APP_VERSION}.zip"
 DMG_NAME="${OUT_DIR}/${APP_NAME}-${APP_VERSION}.dmg"
 
 echo "==> 编译 Release 版本..."
@@ -75,8 +76,11 @@ ln -s /Applications "${DMG_STAGING}/Applications"
 hdiutil create -volname "${APP_NAME}" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${DMG_NAME}" 2>/dev/null
 rm -rf "${DMG_STAGING}"
 
+echo "==> 压缩 ${ZIP_NAME}..."
+cd "${OUT_DIR}" && zip -r "$(basename "${ZIP_NAME}")" "$(basename "${APP_BUNDLE}")" -x "*.DS_Store" > /dev/null && cd - > /dev/null
+
 echo "==> 完成 (v${APP_VERSION})"
-echo "    .app: $(du -sh "${APP_BUNDLE}" | cut -f1)"
+echo "    .zip: $(du -sh "${ZIP_NAME}" | cut -f1)"
 echo "    .dmg: $(du -sh "${DMG_NAME}" | cut -f1)"
 echo "    运行: open ${APP_BUNDLE}"
-echo "    分发: ${DMG_NAME}"
+echo "    分发: ${ZIP_NAME} / ${DMG_NAME}"
