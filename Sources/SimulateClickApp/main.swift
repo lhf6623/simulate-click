@@ -3,17 +3,137 @@ import AppKit
 import SimulateClickCore
 
 // ============================================================
+// MARK: - 主题配色
+// ============================================================
+struct Theme {
+    let isDark: Bool
+    // 卡片
+    let cardBackground: Color
+    let cardBorder: Color
+    let cardCornerRadius: CGFloat
+    let cardBorderWidth: CGFloat
+    let cardPadding: CGFloat
+    // 文字
+    let textPrimary: Color
+    let textSecondary: Color
+    let labelOpacity: CGFloat          // X/Y 标签
+    let separatorOpacity: CGFloat      // ~ 分隔符
+    let statusDotIdleOpacity: CGFloat  // 状态圆点空闲
+    let statusDotGlowOpacity: CGFloat  // 状态圆点光晕
+    let statusTextOpacity: CGFloat     // 状态文字
+    // 输入框
+    let inputBackground: NSColor
+    let inputBorder: NSColor
+    let inputBgAlpha: (focused: CGFloat, normal: CGFloat)
+    let inputBorderAlpha: (focused: CGFloat, normal: CGFloat)
+    let inputBorderWidth: (focused: CGFloat, normal: CGFloat)
+    let cornerRadius: CGFloat
+    let inputFont: NSFont
+    // 迷你按钮
+    let miniButtonBg: Color
+    let miniButtonBorder: Color
+    let miniButtonCornerRadius: CGFloat
+    let miniButtonPressedBgOpacity: CGFloat
+    let miniButtonHoverBgOpacity: CGFloat
+    let miniButtonPressedBorderOpacity: CGFloat
+    let miniButtonHoverBorderOpacity: CGFloat
+    let miniButtonTextOpacity: CGFloat
+    // 操作按钮
+    let actionButtonCornerRadius: CGFloat
+    let actionButtonBgOpacity: (pressed: CGFloat, hover: CGFloat, normal: CGFloat)
+    let actionButtonBorderOpacity: (pressed: CGFloat, hover: CGFloat, normal: CGFloat)
+    // 窗口
+    let windowBackground: NSColor
+
+    var nsTextColor: NSColor { isDark ? .white : .black }
+
+    static let light = Theme(
+        isDark: false,
+        cardBackground: Color(red: 0.98, green: 0.98, blue: 0.99),
+        cardBorder: Color(red: 0.88, green: 0.88, blue: 0.90),
+        cardCornerRadius: 8,
+        cardBorderWidth: 0.5,
+        cardPadding: 8,
+        textPrimary: Color(red: 0.11, green: 0.11, blue: 0.13),
+        textSecondary: Color(red: 0.42, green: 0.42, blue: 0.48),
+        labelOpacity: 0.7,
+        separatorOpacity: 0.4,
+        statusDotIdleOpacity: 0.4,
+        statusDotGlowOpacity: 0.6,
+        statusTextOpacity: 0.8,
+        inputBackground: NSColor(red: 0.93, green: 0.93, blue: 0.95, alpha: 1.0),
+        inputBorder: NSColor(red: 0.80, green: 0.80, blue: 0.84, alpha: 1.0),
+        inputBgAlpha: (0.85, 0.65),
+        inputBorderAlpha: (0.9, 0.5),
+        inputBorderWidth: (0.8, 0.5),
+        cornerRadius: 8,
+        inputFont: .systemFont(ofSize: 14, weight: .regular),
+        miniButtonBg: Color(red: 0.93, green: 0.93, blue: 0.95),
+        miniButtonBorder: Color(red: 0.80, green: 0.80, blue: 0.84),
+        miniButtonCornerRadius: 5,
+        miniButtonPressedBgOpacity: 0.7,
+        miniButtonHoverBgOpacity: 1.0,
+        miniButtonPressedBorderOpacity: 0.8,
+        miniButtonHoverBorderOpacity: 1.0,
+        miniButtonTextOpacity: 0.8,
+        actionButtonCornerRadius: 7,
+        actionButtonBgOpacity: (0.5, 0.85, 0.75),
+        actionButtonBorderOpacity: (0.3, 0.5, 0.4),
+        windowBackground: NSColor(white: 0.93, alpha: 0.92)
+    )
+
+    static let dark = Theme(
+        isDark: true,
+        cardBackground: Color(red: 0.11, green: 0.11, blue: 0.14),
+        cardBorder: Color(red: 0.22, green: 0.22, blue: 0.28),
+        cardCornerRadius: 8,
+        cardBorderWidth: 0.5,
+        cardPadding: 8,
+        textPrimary: Color.white,
+        textSecondary: Color(red: 0.60, green: 0.60, blue: 0.66),
+        labelOpacity: 0.7,
+        separatorOpacity: 0.4,
+        statusDotIdleOpacity: 0.4,
+        statusDotGlowOpacity: 0.6,
+        statusTextOpacity: 0.8,
+        inputBackground: NSColor(red: 0.35, green: 0.35, blue: 0.40, alpha: 1.0),
+        inputBorder: NSColor(red: 0.45, green: 0.45, blue: 0.50, alpha: 1.0),
+        inputBgAlpha: (0.9, 0.75),
+        inputBorderAlpha: (0.8, 0.5),
+        inputBorderWidth: (0.8, 0.5),
+        cornerRadius: 8,
+        inputFont: .systemFont(ofSize: 14, weight: .regular),
+        miniButtonBg: Color(red: 0.17, green: 0.17, blue: 0.21),
+        miniButtonBorder: Color(red: 0.30, green: 0.30, blue: 0.36),
+        miniButtonCornerRadius: 5,
+        miniButtonPressedBgOpacity: 0.7,
+        miniButtonHoverBgOpacity: 1.0,
+        miniButtonPressedBorderOpacity: 0.8,
+        miniButtonHoverBorderOpacity: 1.0,
+        miniButtonTextOpacity: 0.8,
+        actionButtonCornerRadius: 7,
+        actionButtonBgOpacity: (0.5, 0.85, 0.75),
+        actionButtonBorderOpacity: (0.3, 0.5, 0.4),
+        windowBackground: NSColor(white: 0.08, alpha: 0.92)
+    )
+}
+
+// ============================================================
 // MARK: - SwiftUI 主界面
 // ============================================================
 struct ContentView: View {
     @ObservedObject var vm: AppViewModel
+    var colorScheme: ColorScheme = .light
+
+    var theme: Theme { colorScheme == .dark ? .dark : .light }
 
     var body: some View {
+        let _ = print("[ContentView] body rendered, colorScheme: \(colorScheme), isDark: \(theme.isDark)")
         VStack(spacing: 6) {
             // 点击次数
             card {
                 sectionHeader("点击次数 (0为不限)", status: vm.isRunning ? "运行中" : "空闲", running: vm.isRunning)
-                NumericField(text: $vm.countLimitText)
+                NumericField(text: $vm.countLimitText, theme: theme)
                     .frame(height: 28)
             }
 
@@ -21,11 +141,11 @@ struct ContentView: View {
             card {
                 sectionHeader("位置")
                 HStack(spacing: 5) {
-                    Text("X").font(.system(size: 12, weight: .medium)).foregroundColor(.white.opacity(0.35)).frame(width: 14)
-                    NumericField(text: $vm.posXText)
-                    Text("Y").font(.system(size: 12, weight: .medium)).foregroundColor(.white.opacity(0.35)).frame(width: 14)
-                    NumericField(text: $vm.posYText)
-                    Button("捕获") {
+                    Text("X").font(.system(size: 12, weight: .medium)).foregroundColor(theme.textSecondary.opacity(theme.labelOpacity)).frame(width: 14)
+                    NumericField(text: $vm.posXText, theme: theme)
+                    Text("Y").font(.system(size: 12, weight: .medium)).foregroundColor(theme.textSecondary.opacity(theme.labelOpacity)).frame(width: 14)
+                    NumericField(text: $vm.posYText, theme: theme)
+                    MiniButton(title: "捕获", isWaiting: vm.isCapturing, theme: theme) {
                         vm.isCapturing = true
                         CaptureOverlay.show { x, y in
                             vm.posXText = "\(x)"
@@ -37,7 +157,6 @@ struct ContentView: View {
                             NSApp.activate(ignoringOtherApps: true)
                         }
                     }
-                    .buttonStyle(MiniButtonStyle(isWaiting: vm.isCapturing))
                 }
             }
 
@@ -45,20 +164,18 @@ struct ContentView: View {
             card {
                 sectionHeader("间隔 (毫秒)")
                 HStack(spacing: 5) {
-                    NumericField(text: $vm.minDelayText)
-                    Text("~").font(.system(size: 14)).foregroundColor(.white.opacity(0.2))
-                    NumericField(text: $vm.maxDelayText)
+                    NumericField(text: $vm.minDelayText, theme: theme)
+                    Text("~").font(.system(size: 14)).foregroundColor(theme.textSecondary.opacity(theme.separatorOpacity))
+                    NumericField(text: $vm.maxDelayText, theme: theme)
                 }
             }
 
             // 开始/停止按钮
             if !vm.isRunning {
-                Button("开始") { vm.start() }
-                    .buttonStyle(ActionButtonStyle(color: .green))
+                ActionButton(title: "开始", color: .green, textColor: theme.textPrimary, theme: theme) { vm.start() }
                     .frame(height: 32)
             } else {
-                Button("停止 (Esc)  ·  已点击 \(vm.clickCount) 次") { vm.stop() }
-                    .buttonStyle(ActionButtonStyle(color: .red))
+                ActionButton(title: "停止 (Esc)  ·  已点击 \(vm.clickCount) 次", color: .red, textColor: theme.textPrimary, theme: theme) { vm.stop() }
                     .frame(height: 32)
             }
         }
@@ -74,13 +191,13 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 4) {
             content()
         }
-        .padding(8)
-        .background(Color.white.opacity(0.07))
+        .padding(theme.cardPadding)
+        .background(theme.cardBackground)
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: theme.cardCornerRadius)
+                .stroke(theme.cardBorder, lineWidth: theme.cardBorderWidth)
         )
-        .cornerRadius(8)
+        .cornerRadius(theme.cardCornerRadius)
     }
 
     @ViewBuilder
@@ -88,17 +205,17 @@ struct ContentView: View {
         HStack {
             Text(label)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.white.opacity(0.45))
+                .foregroundColor(theme.textSecondary)
             Spacer()
             if let status {
                 HStack(spacing: 3) {
                     Circle()
-                        .fill(running ? Color.green : Color.white.opacity(0.25))
+                        .fill(running ? Color.green : theme.textSecondary.opacity(theme.statusDotIdleOpacity))
                         .frame(width: 5, height: 5)
-                        .shadow(color: running ? .green.opacity(0.6) : .clear, radius: 2)
+                        .shadow(color: running ? .green.opacity(theme.statusDotGlowOpacity) : .clear, radius: 2)
                     Text(status)
                         .font(.system(size: 13))
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(theme.textSecondary.opacity(theme.statusTextOpacity))
                 }
             }
         }
@@ -108,31 +225,76 @@ struct ContentView: View {
 // ============================================================
 // MARK: - 按钮样式
 // ============================================================
-struct MiniButtonStyle: ButtonStyle {
+struct MiniButton: View {
+    let title: String
     var isWaiting = false
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+    var theme: Theme = .light
+    var action: () -> Void
+    @State private var isHovering = false
+    @State private var isPressed = false
+
+    var body: some View {
+        Text(title)
             .font(.system(size: 14, weight: .medium))
-            .foregroundColor(isWaiting ? .yellow : .white.opacity(0.7))
+            .foregroundColor(isWaiting ? .yellow : theme.textPrimary.opacity(theme.miniButtonTextOpacity))
             .frame(width: 52, height: 28)
-            .background(isWaiting ? Color.yellow.opacity(0.15) : Color.white.opacity(0.06))
-            .overlay(RoundedRectangle(cornerRadius: 5).stroke(
-                isWaiting ? Color.yellow.opacity(0.3) : Color.white.opacity(0.1), lineWidth: 0.5))
-            .cornerRadius(5)
-            .opacity(configuration.isPressed ? 0.6 : 1.0)
+            .background(background)
+            .overlay(RoundedRectangle(cornerRadius: theme.miniButtonCornerRadius).stroke(border, lineWidth: 0.5))
+            .cornerRadius(theme.miniButtonCornerRadius)
+            .onHover { isHovering = $0 }
+            .gesture(DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false; action() })
+    }
+
+    private var background: Color {
+        if isWaiting { return Color.yellow.opacity(0.15) }
+        if isPressed { return theme.miniButtonBg.opacity(theme.miniButtonPressedBgOpacity) }
+        if isHovering { return theme.miniButtonBg.opacity(theme.miniButtonHoverBgOpacity) }
+        return theme.miniButtonBg
+    }
+
+    private var border: Color {
+        if isWaiting { return Color.yellow.opacity(0.4) }
+        if isPressed { return theme.miniButtonBorder.opacity(theme.miniButtonPressedBorderOpacity) }
+        if isHovering { return theme.miniButtonBorder.opacity(theme.miniButtonHoverBorderOpacity) }
+        return theme.miniButtonBorder
     }
 }
 
-struct ActionButtonStyle: ButtonStyle {
+struct ActionButton: View {
+    let title: String
     let color: Color
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+    var textColor: Color = .white
+    var theme: Theme = .light
+    var action: () -> Void
+    @State private var isHovering = false
+    @State private var isPressed = false
+
+    var body: some View {
+        Text(title)
             .font(.system(size: 14, weight: .semibold))
-            .foregroundColor(.white)
+            .foregroundColor(textColor)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(color.opacity(configuration.isPressed ? 0.6 : 0.75))
-            .overlay(RoundedRectangle(cornerRadius: 7).stroke(color.opacity(0.4), lineWidth: 0.5))
-            .cornerRadius(7)
+            .background(color.opacity(bgOpacity))
+            .overlay(RoundedRectangle(cornerRadius: theme.actionButtonCornerRadius).stroke(color.opacity(borderOpacity), lineWidth: 0.5))
+            .cornerRadius(theme.actionButtonCornerRadius)
+            .onHover { isHovering = $0 }
+            .gesture(DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false; action() })
+    }
+
+    private var bgOpacity: Double {
+        if isPressed { return Double(theme.actionButtonBgOpacity.pressed) }
+        if isHovering { return Double(theme.actionButtonBgOpacity.hover) }
+        return Double(theme.actionButtonBgOpacity.normal)
+    }
+
+    private var borderOpacity: Double {
+        if isPressed { return Double(theme.actionButtonBorderOpacity.pressed) }
+        if isHovering { return Double(theme.actionButtonBorderOpacity.hover) }
+        return Double(theme.actionButtonBorderOpacity.normal)
     }
 }
 
@@ -142,9 +304,10 @@ struct ActionButtonStyle: ButtonStyle {
 struct NumericField: NSViewRepresentable {
     @Binding var text: String
     var placeholder: String = ""
+    var theme: Theme = .light
 
     func makeNSView(context: Context) -> StyledTextField {
-        let field = StyledTextField()
+        let field = StyledTextField(theme: theme)
         field.delegate = context.coordinator
         field.heightAnchor.constraint(equalToConstant: 28).isActive = true
         field.placeholderString = placeholder.isEmpty ? nil : placeholder
@@ -152,6 +315,7 @@ struct NumericField: NSViewRepresentable {
     }
     func updateNSView(_ nsView: StyledTextField, context: Context) {
         if nsView.stringValue != text { nsView.stringValue = text }
+        nsView.applyTheme(self.theme)  // self 是当前最新的 NumericField，包含最新 theme
     }
     func makeCoordinator() -> Coordinator { Coordinator(self) }
     class Coordinator: NSObject, NSTextFieldDelegate {
@@ -185,30 +349,45 @@ class VerticallyCenteredTextFieldCell: NSTextFieldCell {
 }
 
 class StyledTextField: NSTextField {
-    override init(frame: NSRect) {
-        super.init(frame: frame)
+    private var theme: Theme
+
+    init(theme: Theme = .light) {
+        self.theme = theme
+        super.init(frame: .zero)
         setup()
     }
     required init?(coder: NSCoder) {
+        self.theme = .light
         super.init(coder: coder)
         setup()
     }
+    func applyTheme(_ newTheme: Theme) {
+        print("[StyledTextField] applyTheme called, old isDark: \(theme.isDark), new isDark: \(newTheme.isDark)")
+        guard newTheme.isDark != theme.isDark else { print("[StyledTextField] same isDark, skipping"); return }
+        theme = newTheme
+        font = theme.inputFont
+        textColor = theme.nsTextColor
+        layer?.cornerRadius = theme.cornerRadius
+        if let cell = cell as? VerticallyCenteredTextFieldCell {
+            cell.font = font
+            cell.textColor = textColor
+        }
+        needsDisplay = true
+    }
     private func setup() {
-        font = .monospacedDigitSystemFont(ofSize: 14, weight: .medium)
-        textColor = .white
-        drawsBackground = true
-        backgroundColor = NSColor.white.withAlphaComponent(0.06)
+        font = theme.inputFont
+        textColor = theme.nsTextColor
+        drawsBackground = false  // 由 draw() 自定义绘制，避免双层叠加
         isBordered = false
         isBezeled = false
         focusRingType = .none
         alignment = .center
         wantsLayer = true
-        layer?.cornerRadius = 5
+        layer?.cornerRadius = theme.cornerRadius
         layer?.masksToBounds = true
-        // 使用自定义 Cell 实现垂直居中
         let cell = VerticallyCenteredTextFieldCell()
         cell.font = font
-        cell.textColor = .white
+        cell.textColor = textColor
         cell.alignment = .center
         cell.isBezeled = false
         cell.isBordered = false
@@ -220,11 +399,12 @@ class StyledTextField: NSTextField {
     }
     override func draw(_ dirtyRect: NSRect) {
         let isFocused = window?.firstResponder is NSText
-        NSColor.white.withAlphaComponent(isFocused ? 0.12 : 0.06).setFill()
-        let path = NSBezierPath(roundedRect: bounds, xRadius: 5, yRadius: 5)
+        theme.inputBackground.withAlphaComponent(isFocused ? theme.inputBgAlpha.focused : theme.inputBgAlpha.normal).setFill()
+        let r = theme.cornerRadius
+        let path = NSBezierPath(roundedRect: bounds, xRadius: r, yRadius: r)
         path.fill()
-        NSColor.white.withAlphaComponent(isFocused ? 0.25 : 0.1).setStroke()
-        path.lineWidth = isFocused ? 0.8 : 0.5
+        theme.inputBorder.withAlphaComponent(isFocused ? theme.inputBorderAlpha.focused : theme.inputBorderAlpha.normal).setStroke()
+        path.lineWidth = isFocused ? theme.inputBorderWidth.focused : theme.inputBorderWidth.normal
         path.stroke()
         super.draw(dirtyRect)
     }
@@ -298,12 +478,14 @@ class CaptureOverlay {
 // ============================================================
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow!
+    private var hostingView: NSHostingView<ContentView>!
     private var localEscMonitor: Any?
     private var globalEscMonitor: Any?
+    private var appearanceObserver: NSKeyValueObservation?
     private let vm = AppViewModel()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let contentView = ContentView(vm: vm)
+        let contentView = ContentView(vm: vm, colorScheme: currentColorScheme())
 
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 260, height: 264),
@@ -313,7 +495,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
         window.title = "模拟点击"
         window.isOpaque = false
-        window.backgroundColor = NSColor(red: 0.08, green: 0.06, blue: 0.14, alpha: 0.55)
+        updateWindowBackground()
         window.level = .floating
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         window.hasShadow = true
@@ -325,19 +507,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let visualEffect = NSVisualEffectView(frame: container.bounds)
         visualEffect.autoresizingMask = [.width, .height]
         visualEffect.material = .hudWindow
-        visualEffect.blendingMode = .behindWindow
+        visualEffect.blendingMode = .withinWindow
         visualEffect.state = .active
         visualEffect.wantsLayer = true
         container.addSubview(visualEffect)
 
-        let hostingView = NSHostingView(rootView: contentView)
+        hostingView = NSHostingView(rootView: contentView)
         hostingView.frame = container.bounds
         hostingView.autoresizingMask = [.width, .height] as NSView.AutoresizingMask
         container.addSubview(hostingView)
 
         window.contentView = container
 
-        NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { _ in
+        // KVO 监听窗口外观变化
+        appearanceObserver = window.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, change in
+            print("[KVO] effectiveAppearance changed: \(change.newValue?.name.rawValue ?? "nil")")
+            DispatchQueue.main.async { self?.onThemeChanged() }
+        }
+        print("[Init] KVO observer set up, initial appearance: \(window.effectiveAppearance.name.rawValue)")
+        print("[Init] initial colorScheme: \(currentColorScheme())")
+
+        NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
             if CaptureOverlay.isActive {
                 CaptureOverlay.handleEscape()
             }
@@ -366,6 +556,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+    }
+
+    private func currentColorScheme() -> ColorScheme {
+        let name = NSApp.effectiveAppearance.name.rawValue
+        let result: ColorScheme = name.contains("Dark") ? .dark : .light
+        print("[currentColorScheme] appearance name: \(name) -> \(result)")
+        return result
+    }
+
+    private func onThemeChanged() {
+        print("[Theme] === onThemeChanged START ===")
+        let scheme = currentColorScheme()
+        print("[Theme] updating window bg + rootView to scheme: \(scheme)")
+        updateWindowBackground()
+        hostingView.rootView = ContentView(vm: vm, colorScheme: scheme)
+        print("[Theme] === onThemeChanged END ===")
+    }
+
+    private func updateWindowBackground() {
+        let isDark = NSApp.effectiveAppearance.name.rawValue.contains("Dark")
+        window.backgroundColor = (isDark ? Theme.dark : Theme.light).windowBackground
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

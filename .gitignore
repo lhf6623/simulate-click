@@ -3,4 +3,6 @@
 dist/
 .DS_Store
 .qoder/
+.reasonix/
+reasonix.toml
 simulate-click-swift

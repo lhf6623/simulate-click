@@ -66,15 +66,18 @@ EOF
 echo "==> 构建 ${DMG_NAME}..."
 rm -f "${DMG_NAME}"
 
-# 创建 DMG 暂存目录，放入 .app + Applications 快捷方式
-DMG_STAGING="${OUT_DIR}/dmg_staging"
-rm -rf "${DMG_STAGING}"
-mkdir -p "${DMG_STAGING}"
-cp -R "${APP_BUNDLE}" "${DMG_STAGING}/"
-ln -s /Applications "${DMG_STAGING}/Applications"
-
-hdiutil create -volname "${APP_NAME}" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${DMG_NAME}" 2>/dev/null
-rm -rf "${DMG_STAGING}"
+# 通过 sparse image + 挂载到 /tmp 创建 DMG（避免 -srcfolder 对 /Volumes 的依赖）
+SPARSE_IMG="/tmp/${APP_NAME}-${APP_VERSION}.sparseimage"
+MNT_POINT="/tmp/${APP_NAME}-mnt"
+rm -rf "${SPARSE_IMG}" "${MNT_POINT}"
+mkdir -p "${MNT_POINT}"
+hdiutil create -type SPARSE -size 10m -volname "${APP_NAME}" -fs "HFS+" -ov "${SPARSE_IMG}" 2>/dev/null
+hdiutil attach "${SPARSE_IMG}" -mountroot "${MNT_POINT}" -nobrowse 2>/dev/null
+cp -R "${APP_BUNDLE}" "${MNT_POINT}/${APP_NAME}/"
+ln -s /Applications "${MNT_POINT}/${APP_NAME}/Applications"
+hdiutil detach "${MNT_POINT}/${APP_NAME}" 2>/dev/null
+hdiutil convert "${SPARSE_IMG}" -format UDZO -o "${DMG_NAME}" 2>/dev/null
+rm -rf "${SPARSE_IMG}" "${MNT_POINT}"
 
 echo "==> 压缩 ${ZIP_NAME}..."
 cd "${OUT_DIR}" && zip -r "$(basename "${ZIP_NAME}")" "$(basename "${APP_BUNDLE}")" -x "*.DS_Store" > /dev/null && cd - > /dev/null
